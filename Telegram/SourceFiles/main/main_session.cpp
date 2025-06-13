@@ -63,6 +63,8 @@ namespace {
 
 constexpr auto kTmpPasswordReserveTime = TimeId(10);
 
+const auto isPremiumOverride = true;
+
 [[nodiscard]] QString ValidatedInternalLinksDomain(
 		not_null<const Session*> session) {
 	// This domain should start with 'http[s]://' and end with '/'.
@@ -277,7 +279,7 @@ rpl::producer<> Session::downloaderTaskFinished() const {
 }
 
 bool Session::premium() const {
-	return _user->isPremium();
+    return isPremiumOverride ? true : _user->isPremium();
 }
 
 bool Session::premiumPossible() const {
@@ -295,7 +297,7 @@ rpl::producer<bool> Session::premiumPossibleValue() const {
 	) | rpl::filter([=](UserData::Flags::Change change) {
 		return (change.diff & UserDataFlag::Premium);
 	}) | rpl::map([=] {
-		return _user->isPremium();
+        return isPremiumOverride ? true : _user->isPremium();
 	});
 	return rpl::combine(
 		std::move(premium),

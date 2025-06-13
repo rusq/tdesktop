@@ -52,6 +52,10 @@ namespace {
 	return window->sessionController();
 }
 
+// master switch flags for suggestions.
+const auto isBirthdayEnabled = false;
+const auto isPremiumEnabled = false;
+
 constexpr auto kSugSetBirthday = "BIRTHDAY_SETUP"_cs;
 constexpr auto kSugBirthdayContacts = "BIRTHDAY_CONTACTS_TODAY"_cs;
 constexpr auto kSugPremiumAnnual = "PREMIUM_ANNUAL"_cs;
@@ -146,7 +150,7 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 				state->desiredWrapToggle.force_assign(
 					Toggle{ true, anim::type::normal });
 				return;
-			} else if (session->premiumCanBuy()
+			} else if (isPremiumEnabled && session->premiumCanBuy()
 				&& promo->current(kSugPremiumGrace.utf8())) {
 				content->setRightIcon(RightIcon::Close);
 				content->setLeftPadding(0);
@@ -172,7 +176,7 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 				state->desiredWrapToggle.force_assign(
 					Toggle{ true, anim::type::normal });
 				return;
-			} else if (session->premiumCanBuy()
+			} else if (isPremiumEnabled && session->premiumCanBuy()
 				&& promo->current(kSugLowCreditsSubs.utf8())) {
 				state->creditsHistory = std::make_unique<Api::CreditsHistory>(
 					session->user(),
@@ -260,7 +264,7 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 				}, state->creditsLifetime);
 
 				return;
-			} else if (session->premiumCanBuy()
+			} else if (isPremiumEnabled && session->premiumCanBuy()
 				&& promo->current(kSugBirthdayContacts.utf8())) {
 				promo->requestContactBirthdays(crl::guard(content, [=] {
 					const auto users = promo->knownBirthdaysToday().value_or(
@@ -392,7 +396,7 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 						Toggle{ true, anim::type::normal });
 				}));
 				return;
-			} else if (promo->current(kSugSetBirthday.utf8())
+			} else if (isBirthdayEnabled && promo->current(kSugSetBirthday.utf8())
 				&& !Data::IsBirthdayToday(session->user()->birthday())) {
 				content->setRightIcon(RightIcon::Close);
 				content->setLeftPadding(0);
@@ -428,7 +432,7 @@ rpl::producer<Ui::SlideWrap<Ui::RpWidget>*> TopBarSuggestionValue(
 				state->desiredWrapToggle.force_assign(
 					Toggle{ true, anim::type::normal });
 				return;
-			} else if (session->premiumPossible() && !session->premium()) {
+            } else if (isPremiumEnabled && session->premiumPossible() && !session->premium()) {
 				const auto isPremiumAnnual = promo->current(
 					kSugPremiumAnnual.utf8());
 				const auto isPremiumRestore = !isPremiumAnnual
